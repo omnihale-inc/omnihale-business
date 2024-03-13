@@ -12,10 +12,10 @@ jobs:
       matrix:
         node: [16, 18, 20]
 
-    name: Node ${{ matrix.node }} sample
+    name: Node ${{ matrix.node }} build
     steps:
       - uses: actions/checkout@v3
-      - name: Run linting rules and tests
+      - name: Run linting rules and build
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
