@@ -24,7 +24,7 @@ const AddAppointmentModalChildren = ({
             onClick={() => {
               // Closes modal
               onModal(false);
-              // Changes url back to home url
+              // Changes url back to health care provider home
               history.pushState({}, '', '/');
               // Enables scrolling
               const body = document.querySelector('body');
