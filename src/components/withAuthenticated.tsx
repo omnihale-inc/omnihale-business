@@ -1,4 +1,6 @@
-import { useState, useEffect } from "react";
+"use client";
+
+import { useEffect } from "react";
 import { redirect } from "next/navigation";
 
 const withAuthenticated = (Component: () => React.JSX.Element) => {
@@ -8,7 +10,8 @@ const withAuthenticated = (Component: () => React.JSX.Element) => {
         redirect("/auth");
       }
     });
-    return localStorage.getItem("token") && <Component />;
+    if (typeof window !== "undefined")
+      return localStorage.getItem("token") && <Component />;
   };
 };
 
