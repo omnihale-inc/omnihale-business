@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { redirect } from "next/navigation";
 
 import HomeContents from "@/components/HomeContents";
 import Header from "@/components/Header";
 import AddAppointmentModal from "@/components/AddAppointmentModal";
 import AddAppointmentModalChildren from "@/components/AddAppointmentModalChildren";
+import withAuthenticated from "@/components/withAuthenticated";
 
 const data = {
   appointments: [
@@ -51,7 +53,7 @@ const data = {
   ],
 };
 
-export default function HomePage() {
+function HomePage() {
   const [modal, setModal] = useState(false);
   useEffect(() => {
     // Check if the user is coming from the add-appointment page
@@ -84,3 +86,7 @@ export default function HomePage() {
     </main>
   );
 }
+
+const AuthenticatedHomePage = withAuthenticated(HomePage);
+
+export default AuthenticatedHomePage;
