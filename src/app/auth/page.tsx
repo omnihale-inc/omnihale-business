@@ -24,7 +24,7 @@ export default function AuthPage() {
   });
   // Renders Login component when the user visit's the page
   const [isUserSignUp, setIsUserSignUp] = useState(true);
-  const [isUserLogin, setIsUserLogin] = useState(false);
+  const [isUserLogin, setIsUserLogin] = useState(true);
 
   // Login error response
   const [loginErrorResponse, setLoginErrorResponse] = useState<string | null>(
@@ -44,6 +44,14 @@ export default function AuthPage() {
   );
   // Disables the sign up button
   const [disableButton, setDisabledButton] = useState(false);
+
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      setIsUserLogin(false);
+    } else {
+      redirect("/");
+    }
+  }, []);
 
   const onChangeHandlerSignUp: ChangeEventHandler<
     HTMLInputElement | HTMLSelectElement
@@ -78,9 +86,7 @@ export default function AuthPage() {
   };
 
   // Redirects the user to the dashboard if the user is logged in
-  if (isUserLogin) {
-    return redirect("/");
-  } else {
+  if (!isUserLogin) {
     // Checks if the user is not signed up
     if (!isUserSignUp) {
       // Renders the sign up form
@@ -203,7 +209,7 @@ const loginHandler = (
       // Checks if the status is 200
       if (data.status === 200) {
         // Sets the user login to true
-        setIsUserLogin(true);
+        location.href = "/";
       }
       // Checks if the status is 401
       if (data.status === 401) {
@@ -214,8 +220,7 @@ const loginHandler = (
     })
     .then((data) => {
       // Sets the token in the local storage
-      localStorage.setItem("token", data.access_token);
-      // Sets the user login to true
+      if (!data.message) localStorage.setItem("token", data.access_token);
     })
     .catch((error) => {
       console.error(error);

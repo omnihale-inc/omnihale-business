@@ -150,6 +150,8 @@ const signUpValidation = (
       minLength: 8,
       minUppercase: 0,
       minSymbols: 0,
+      minNumbers: 0,
+      minLowercase: 0,
     })
   ) {
     errorHandler({ code: 14, msg: "invalid password" });

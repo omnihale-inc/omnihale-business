@@ -108,8 +108,4 @@ function ConfigureAppointmentPage() {
   );
 }
 
-const AuthenticatedConfigureAppointmentPage = withAuthenticated(
-  ConfigureAppointmentPage
-);
-
-export default AuthenticatedConfigureAppointmentPage;
+export default withAuthenticated(ConfigureAppointmentPage);

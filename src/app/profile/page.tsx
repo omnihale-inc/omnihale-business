@@ -124,6 +124,4 @@ function ProfilePage() {
   );
 }
 
-const AuthenticatedProfilePage = withAuthenticated(ProfilePage);
-
-export default AuthenticatedProfilePage;
+export default withAuthenticated(ProfilePage);
