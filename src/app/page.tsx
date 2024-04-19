@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { redirect } from "next/navigation";
 
 import HomeContents from "@/components/HomeContents";
 import Header from "@/components/Header";
@@ -63,16 +64,21 @@ function HomePage() {
       localStorage.setItem("add-appointment", "false");
     }
   }, []);
-  // useEffect(() => {
-  //   const token = localStorage.getItem("token");
-  //   const options = {
-  //     method: "GET",
-  //     headers: {
-  //       Authorization: `Bearer ${token}`,
-  //     },
-  //   };
-  //   fetch("http://127.0.0.1:8000/appointments", options);
-  // }, []);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const options = {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    fetch("http://127.0.0.1:8000/appointments", options).then((data) => {
+      if (data.status === 422) {
+        localStorage.removeItem("token");
+        location.href = "/auth";
+      }
+    });
+  }, []);
   return (
     <main className="pt-10 w-11/12  mx-auto">
       <Header />
