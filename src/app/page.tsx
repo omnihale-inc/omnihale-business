@@ -9,52 +9,13 @@ import AddAppointmentModal from "@/components/AddAppointmentModal";
 import AddAppointmentModalChildren from "@/components/AddAppointmentModalChildren";
 import withAuthenticated from "@/components/withAuthenticated";
 
-const data = {
-  appointments: [
-    {
-      id: 1,
-      patientName: "John Doe",
-      doctorName: "Dr. Smith",
-      appointmentDate: "2022-09-01",
-      appointmentTime: "10:00 AM",
-    },
-    {
-      id: 1,
-      name: "John Doe",
-      age: 30,
-      email: "johndoe@example.com",
-    },
-    {
-      id: 2,
-      patientName: "Jane Smith",
-      doctorName: "Dr. Johnson",
-      appointmentDate: "2022-09-02",
-      appointmentTime: "11:30 AM",
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      age: 25,
-      email: "janesmith@example.com",
-    },
-    {
-      id: 3,
-      name: "Mike Johnson",
-      age: 35,
-      email: "mikejohnson@example.com",
-    },
-    {
-      id: 3,
-      patientName: "Michael Brown",
-      doctorName: "Dr. Davis",
-      appointmentDate: "2022-09-03",
-      appointmentTime: "2:15 PM",
-    },
-  ],
-};
-
 function HomePage() {
   const [modal, setModal] = useState(false);
+  const [isTokenOk, setIsTokenOk] = useState(false);
+  const [data, setData] = useState({ appointments: [] });
+  const [fields, setFields] = useState([]);
+  const [addAppointment, setAddAppointment] = useState({});
+
   useEffect(() => {
     // Check if the user is coming from the add-appointment page
     if (localStorage.getItem("add-appointment") === "true") {
@@ -72,23 +33,61 @@ function HomePage() {
         Authorization: `Bearer ${token}`,
       },
     };
-    fetch("http://127.0.0.1:8000/appointments", options).then((data) => {
-      if (data.status === 422) {
-        localStorage.removeItem("token");
-        location.href = "/auth";
-      }
-    });
+    fetch("http://127.0.0.1:8000/appointments", options)
+      .then((data) => {
+        if (data.status === 422 || data.status === 401) {
+          localStorage.removeItem("token");
+          location.href = "/auth";
+        } else {
+          setIsTokenOk(true);
+        }
+        return data.json();
+      })
+      .then((data) => {
+        setData({ appointments: data });
+      });
   }, []);
-  return (
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const options = {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    fetch("http://127.0.0.1:8000/appointments", options)
+      .then((data) => {
+        if (data.status === 422 || data.status === 401) {
+          localStorage.removeItem("token");
+          location.href = "/auth";
+        } else {
+          setIsTokenOk(true);
+        }
+        return data.json();
+      })
+      .then((data) => {
+        setFields(data);
+      });
+  }, []);
+
+  return isTokenOk ? (
     <main className="pt-10 w-11/12  mx-auto">
       <Header />
       <HomeContents data={data} onModal={setModal} />
       {modal && (
         <AddAppointmentModal>
-          <AddAppointmentModalChildren onModal={setModal} />
+          <AddAppointmentModalChildren
+            addAppointment={addAppointment}
+            fields={fields}
+            setAddAppointment={setAddAppointment}
+            onModal={setModal}
+          />
         </AddAppointmentModal>
       )}
     </main>
+  ) : (
+    <div></div>
   );
 }
 

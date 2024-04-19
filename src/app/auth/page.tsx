@@ -45,7 +45,9 @@ export default function AuthPage() {
   // Disables the sign up button
   const [disableButton, setDisabledButton] = useState(false);
 
+  // Checks if the user is logged in
   useEffect(() => {
+    // Redirects the user to the dashboard if the user is logged in
     if (!localStorage.getItem("token")) {
       setIsUserLogin(false);
     } else {
