@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import trashIcon from "@/assets/icons/trash.png";
 import saveIcon from "@/assets/icons/save.png";
@@ -10,10 +10,75 @@ import backIcon from "@/assets/icons/back.png";
 import withAuthenticated from "@/components/withAuthenticated";
 
 function ConfigureAppointmentPage() {
-  const previousFields = ["name", "address", "test"];
+  const [previousFields, setPreviousFields] = useState([]);
   const [fields, setFields] = useState<Array<string>>([...previousFields]);
   const [inputField, setInputField] = useState<string>("");
-  return (
+  const [saveFields, setSaveFields] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [isTokenOk, setIsTokenOk] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setIsTokenOk(true);
+    } else {
+      location.href = "/auth";
+    }
+    const options: RequestInit = {
+      // Set the headers
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(fields),
+    };
+    if (saveFields) {
+      // Save the fields
+      fetch("http://127.0.0.1:8000/appointment-fields", options)
+        .then((data) => {
+          localStorage.removeItem("fields");
+          // Check if the token is valid
+          if (data.status === 422 || data.status === 401) {
+            localStorage.removeItem("token");
+            location.href = "/auth";
+          } else {
+            setIsSaved(true);
+          }
+          return data.json();
+        })
+        .then((data) => {
+          // Save the fields to the local storage
+          localStorage.setItem("fields", JSON.stringify(data));
+        });
+    }
+  }, [saveFields]);
+
+  useEffect(() => {
+    // Get the fields from the local storage
+    const fields = localStorage.getItem("fields");
+    // Set the fields
+    if (fields) {
+      setFields(JSON.parse(fields));
+    } else {
+      const token = localStorage.getItem("token");
+      const options: RequestInit = {
+        // Set the headers
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      fetch("http://127.0.0.1:8000/appointment-fields", options)
+        .then((data) => data.json())
+        .then((data) => {
+          setFields(data);
+          localStorage.setItem("fields", JSON.stringify(data));
+        });
+    }
+  }, []);
+
+  return isTokenOk ? (
     <main className="lg:px-20 pt-10">
       <header className="flex items-center justify-between">
         {/* go back home */}
@@ -29,6 +94,9 @@ function ConfigureAppointmentPage() {
         <h1 className="text-2xl font-semibold">Configure Appointment</h1>
       </header>
       <section className="w-2/5 bg-slate-50 mx-auto mt-14 p-10 box-border border border-gray-400 rounded-md">
+        {isSaved && (
+          <p className="text-xs text-green-600 my-2">Changes was successful</p>
+        )}
         <h3 className="mb-1 font-semibold text-xl">Add appointment fields</h3>
         <p className="text-gray-600 text-xs mb-5">
           Appointments fields are the fields you want to available when adding a
@@ -51,6 +119,7 @@ function ConfigureAppointmentPage() {
                   onClick={() => {
                     // remove the field from the fields array
                     const newFields = fields.filter((_, i) => i !== index);
+                    localStorage.setItem("fields", JSON.stringify(newFields));
                     setFields(newFields);
                   }}
                 >
@@ -70,7 +139,10 @@ function ConfigureAppointmentPage() {
           className="text-xs py-2 px-4 w-full rounded-lg mb-2 border border-gray-400"
           type="text"
           placeholder="Type in the appointment field you want to create"
-          onChange={(e) => setInputField(e.target.value)}
+          onChange={(e) => {
+            setSaveFields(false);
+            setInputField(e.target.value);
+          }}
           value={inputField}
         />
         <div className="flex justify-end mt-2">
@@ -87,7 +159,12 @@ function ConfigureAppointmentPage() {
             <Image src={addIcon} alt="add fields" width={13} height={13} />
             <span className="text-sm ml-1"> Add field</span>
           </button>
-          <button className="border rounded-2xl border-black px-4 py-1 text-sm flex items-center">
+          <button
+            className="border rounded-2xl border-black px-4 py-1 text-sm flex items-center"
+            onClick={() => {
+              setSaveFields(true);
+            }}
+          >
             <Image src={saveIcon} alt="save fields" width={15} height={15} />
             <span className="text-sm ml-1">Save</span>
           </button>
@@ -105,6 +182,8 @@ function ConfigureAppointmentPage() {
         <p className="font-semibold">Omnihale</p>
       </div>
     </main>
+  ) : (
+    <div></div>
   );
 }
 
