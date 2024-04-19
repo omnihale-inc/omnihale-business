@@ -44,30 +44,8 @@ function HomePage() {
         return data.json();
       })
       .then((data) => {
+        console.log(data);
         setData({ appointments: data });
-      });
-  }, []);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const options = {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-    fetch("http://127.0.0.1:8000/appointments", options)
-      .then((data) => {
-        if (data.status === 422 || data.status === 401) {
-          localStorage.removeItem("token");
-          location.href = "/auth";
-        } else {
-          setIsTokenOk(true);
-        }
-        return data.json();
-      })
-      .then((data) => {
-        setFields(data);
       });
   }, []);
 
