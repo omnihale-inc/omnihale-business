@@ -1,44 +1,54 @@
-import React from 'react';
-import Image from 'next/image';
-import profileIcon from '@/assets/icons/profile.png';
-import signoutIcon from '@/assets/icons/signout.png';
+import React from "react";
+import Image from "next/image";
+import profileIcon from "@/assets/icons/profile.png";
+import signoutIcon from "@/assets/icons/signout.png";
 
 const Header = () => {
   return (
-    <header className='lg:flex mb-10 lg:justify-between'>
-      <div className='lg:flex lg:items-center'>
+    <header className="lg:flex mb-10 lg:justify-between">
+      <div className="lg:flex lg:items-center">
         <Image
-          src='/logo.svg'
-          alt='Omnihale Logo'
+          src="/logo.svg"
+          alt="Omnihale Logo"
           width={35}
           height={35}
-          className='rounded-md lg:rounded-md mr-2'
+          className="rounded-md lg:rounded-md mr-2"
         />
-        <h1 className='text-xl font-semibold'>Omnihale</h1>
+        <h1 className="text-xl font-semibold mr-2">Omnihale</h1>
+        <p className="text-gray-400">for Business</p>
       </div>
-      <div className='lg:flex'>
+      <div className="lg:flex">
         <button
-          className='lg:flex lg:items-center mr-6'
+          className="lg:flex lg:items-center mr-6"
           onClick={() => {
-            location.href = '/profile';
+            location.href = "/profile";
           }}
         >
           <Image
             src={profileIcon}
-            alt='profile'
+            alt="profile"
             width={14}
             height={14}
-            className='mr-1'
+            className="mr-1"
           />
           <span>profile</span>
         </button>
-        <button className='lg:flex lg:items-center'>
+        <button
+          className="lg:flex lg:items-center"
+          onClick={() => {
+            localStorage.removeItem("token");
+            localStorage.removeItem("fields");
+            localStorage.removeItem("appointments");
+            localStorage.removeItem("user_id");
+            location.reload();
+          }}
+        >
           <Image
             src={signoutIcon}
-            alt='profile'
+            alt="profile"
             width={14}
             height={14}
-            className='mr-1'
+            className="mr-1"
           />
           sign out
         </button>

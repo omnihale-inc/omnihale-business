@@ -9,13 +9,18 @@ import addIcon from "@/assets/icons/add.png";
 import backIcon from "@/assets/icons/back.png";
 import withAuthenticated from "@/components/withAuthenticated";
 
+const URL =
+  process.env.NODE_ENV === "development"
+    ? "http://127.0.0.1:8000"
+    : "https://api.omnihale.com";
+
 function ConfigureAppointmentPage() {
-  const [previousFields, setPreviousFields] = useState([]);
-  const [fields, setFields] = useState<Array<string>>([...previousFields]);
+  const [fields, setFields] = useState<Array<string>>([]);
   const [inputField, setInputField] = useState<string>("");
   const [saveFields, setSaveFields] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [isTokenOk, setIsTokenOk] = useState(false);
+  const [loadingFields, setLoadingFields] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -35,7 +40,7 @@ function ConfigureAppointmentPage() {
     };
     if (saveFields) {
       // Save the fields
-      fetch("http://127.0.0.1:8000/appointment-fields", options)
+      fetch(`${URL}/appointment-fields`, options)
         .then((data) => {
           localStorage.removeItem("fields");
           // Check if the token is valid
@@ -52,30 +57,34 @@ function ConfigureAppointmentPage() {
           localStorage.setItem("fields", JSON.stringify(data));
         });
     }
-  }, [saveFields]);
+  }, [saveFields, fields]);
 
   useEffect(() => {
-    // Get the fields from the local storage
-    const fields = localStorage.getItem("fields");
     // Set the fields
-    if (fields) {
-      setFields(JSON.parse(fields));
-    } else {
-      const token = localStorage.getItem("token");
-      const options: RequestInit = {
-        // Set the headers
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
-      fetch("http://127.0.0.1:8000/appointment-fields", options)
-        .then((data) => data.json())
-        .then((data) => {
+    const token = localStorage.getItem("token");
+    const options: RequestInit = {
+      // Set the headers
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    fetch(`${URL}/appointment-fields`, options)
+      .then((data) => data.json())
+      .then((data) => {
+        let fields = localStorage.getItem("fields");
+        if (
+          data.msg === "Token has expired" ||
+          (fields && JSON.parse(fields)?.msg === "Token has expired")
+        ) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("fields");
+        } else {
           setFields(data);
           localStorage.setItem("fields", JSON.stringify(data));
-        });
-    }
+          setLoadingFields(false);
+        }
+      });
   }, []);
 
   return isTokenOk ? (
@@ -103,6 +112,7 @@ function ConfigureAppointmentPage() {
           patient appointment to the appointments list
         </p>
         <div className="mb-10">
+          {loadingFields && <p className="text-sm my-2">loading fields ...</p>}
           <h3 className="underline font-semibold">Fields</h3>
           {
             // display the fields array

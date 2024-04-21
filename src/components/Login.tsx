@@ -12,11 +12,14 @@ type LoginProps = {
   loginHandler: (
     loginCredentials: LoginCredentials,
     setIsUserLogin: (value: boolean) => void,
-    setErrorResponse: (value: string | null) => void
+    setErrorResponse: (value: string | null) => void,
+    setDisabledLoginButton: (value: boolean) => void
   ) => void;
   errorErrorResponse: string | null;
   setErrorResponse: (value: string | null) => void;
   setIsUserLogin: (value: boolean) => void;
+  disableLoginButton: boolean;
+  onDisabledLoginButton: (value: boolean) => void;
   children: React.ReactNode;
 };
 
@@ -27,6 +30,8 @@ const Login = ({
   errorErrorResponse,
   setErrorResponse,
   setIsUserLogin,
+  disableLoginButton,
+  onDisabledLoginButton,
   children,
 }: LoginProps) => {
   return (
@@ -38,12 +43,22 @@ const Login = ({
         )}
         <form onSubmit={(e) => e.preventDefault()}>
           {children}
+          {disableLoginButton && <p className="text-sm my-2">Logging in...</p>}
           <div className="flex justify-center">
             <button
-              className="bg-blue-700 my-3 px-4 py-2 text-white text-sm rounded-md"
-              onClick={() =>
-                loginHandler(fields, setIsUserLogin, setErrorResponse)
-              }
+              className={`${
+                disableLoginButton ? "bg-blue-500" : "bg-blue-700"
+              } my-3 px-4 py-2 text-white text-sm rounded-md`}
+              disabled={disableLoginButton}
+              onClick={() => {
+                loginHandler(
+                  fields,
+                  setIsUserLogin,
+                  setErrorResponse,
+                  onDisabledLoginButton
+                );
+                onDisabledLoginButton(true);
+              }}
             >
               Login to account
             </button>

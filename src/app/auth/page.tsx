@@ -9,6 +9,11 @@ import { LoginCredentials, SignUpCredentials } from "@/types/authCredentials";
 import AuthInput from "@/components/Input";
 import React from "react";
 
+const URL =
+  process.env.NODE_ENV === "development"
+    ? "http://127.0.0.1:8000"
+    : "https://api.omnihale.com";
+
 export default function AuthPage() {
   const [signUp, setSignUp] = useState<SignUpCredentials>({
     name: "",
@@ -44,6 +49,9 @@ export default function AuthPage() {
   );
   // Disables the sign up button
   const [disableButton, setDisabledButton] = useState(false);
+
+  // Disables the sign up button
+  const [disableLoginButton, setDisabledLoginButton] = useState(false);
 
   // Checks if the user is logged in
   useEffect(() => {
@@ -84,6 +92,8 @@ export default function AuthPage() {
     loginHandler,
     errorErrorResponse: loginErrorResponse,
     setErrorResponse: setLoginErrorResponse,
+    disableLoginButton,
+    onDisabledLoginButton: setDisabledLoginButton,
     setIsUserLogin,
   };
 
@@ -122,7 +132,10 @@ export default function AuthPage() {
                       <AuthInput
                         key={index}
                         type={fieldType}
-                        onChange={onChangeHandlerSignUp}
+                        onChange={(e) => {
+                          onChangeHandlerSignUp(e);
+                          setSignUpErrorResponse(null);
+                        }}
                         placeholder={placeholder}
                         value={value[0]}
                       />
@@ -157,6 +170,13 @@ export default function AuthPage() {
                   const name = e.target.name;
                   const value = e.target.value;
                   setLogin((state) => ({ ...state, [name]: value }));
+                  setErrors({
+                    invalidEmail: false,
+                    passwordNotSame: false,
+                    invalidPassword: false,
+                    empty: false,
+                  });
+                  setLoginErrorResponse(null);
                 }}
                 value={value[0]}
               />
@@ -196,10 +216,11 @@ const getPlaceHolderandFieldType = (value: string) => {
 const loginHandler = (
   loginCredentials: LoginCredentials,
   setIsUserLogin: (value: boolean) => void,
-  setErrorResponse: (value: string | null) => void
+  setErrorResponse: (value: string | null) => void,
+  setDisbaledLoginButton: (value: boolean) => void
 ) => {
   // Sends a post request to the server
-  fetch("http://127.0.0.1:8000/login", {
+  fetch(`${URL}/login`, {
     headers: {
       "Content-Type": "application/json",
     },
@@ -217,12 +238,20 @@ const loginHandler = (
       if (data.status === 401) {
         // Sets the error response
         setErrorResponse("Invalid credentials");
+        setDisbaledLoginButton(false);
+      } else {
+        localStorage.removeItem("token");
+        localStorage.removeItem("fields");
+        localStorage.removeItem("user_id");
       }
       return data.json();
     })
     .then((data) => {
       // Sets the token in the local storage
-      if (!data.message) localStorage.setItem("token", data.access_token);
+      if (!data.message) {
+        localStorage.setItem("token", data.access_token);
+        localStorage.setItem("user_id", data.user);
+      }
     })
     .catch((error) => {
       console.error(error);
@@ -237,7 +266,7 @@ const signUpHandler = (
   setDisableButton: (value: boolean | { (value: boolean): boolean }) => void
 ) => {
   // Sends a post request to the server
-  fetch("http://127.0.0.1:8000/signup", {
+  fetch(`${URL}/signup`, {
     headers: {
       "Content-Type": "application/json",
     },

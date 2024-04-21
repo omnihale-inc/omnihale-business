@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = LocalFont({ src: "../assets/fonts/Satoshi-Variable.ttf" });
 
 export const metadata: Metadata = {
-  title: "Healthcare provider App",
-  description: "Application meant for healthcare provider related operations",
+  title: "Omnihale | Business",
+  description: "Enabling care giver providing their services easily",
   icons: "/logo.svg",
 };
 

@@ -1,6 +1,5 @@
 "use client";
 
-import withAuthenticated from "@/components/withAuthenticated";
 import { permanentRedirect } from "next/navigation";
 import { useEffect } from "react";
 
