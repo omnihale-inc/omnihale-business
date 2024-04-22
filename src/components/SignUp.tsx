@@ -104,7 +104,8 @@ const SignUp = ({
             height={30}
             className="mr-3 rounded-md"
           />
-          <p className="font-semibold">Omnihale</p>
+          <p className="font-semibold mr-1">Omnihale</p>
+          <p className="text-gray-500">for Business</p>
         </div>
       </div>
     </section>
