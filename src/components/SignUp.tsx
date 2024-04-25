@@ -47,7 +47,7 @@ const SignUp = ({
 }: SignUpProps) => {
   return (
     <section className="grid place-items-center h-screen">
-      <div className="w-1/6">
+      <div className="w-10/12 max-w-80">
         <h3 className="text-center m-3 text-2xl font-semibold">Sign Up</h3>
         <p className="text-xs mb-5">
           Create an account for a healthcare provider

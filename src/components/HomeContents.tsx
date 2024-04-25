@@ -64,7 +64,7 @@ const HomeContents = ({ onModal }: HomeContentsProps) => {
   }, []);
   return (
     <>
-      <section className="flex justify-end">
+      <section className=" lg:flex lg:justify-end">
         <a href="/configure-appointment" className="mr-2">
           <Button backgroundColor="bg-blue-700">Configure Appointment</Button>
         </a>
@@ -80,11 +80,11 @@ const HomeContents = ({ onModal }: HomeContentsProps) => {
           Add Appointment
         </Button>
       </section>
-      <section className="w-10/12 mx-auto">
+      <section className="mb-6 lg:w-10/12 mx-auto overflow-x-scroll lg:overflow-x-auto">
         <h2 className="mt-16 mb-5 text-2xl font-semibold">Appointments</h2>
         {loadingAppointment && <p className="my-3">Loading Appointments...</p>}
         {/*display the appointments*/}
-        <ul>
+        <ul className="text-xs lg:text-base">
           {
             // map through the appointments and display them
             data.appointments.map((appointment, index) => {
@@ -104,7 +104,7 @@ const HomeContents = ({ onModal }: HomeContentsProps) => {
                                 Object.entries(appointment).length - 2
                                   ? "border-r"
                                   : ""
-                              } border-gray-400 flex flex-col justify-center`}
+                              } border-gray-400 flex flex-col justify-center w-44 md:w-fit`}
                               key={itemIndex}
                             >
                               <h6 className="text-xs text-gray-500">

@@ -36,7 +36,7 @@ const Login = ({
 }: LoginProps) => {
   return (
     <section className="grid place-items-center h-screen">
-      <div className="w-1/6">
+      <div className="w-10/12 max-w-80">
         <h3 className="text-center m-3 text-2xl font-semibold">Log In</h3>
         {errorErrorResponse && (
           <p className="text-red-600 text-xs mb-2">{errorErrorResponse}</p>

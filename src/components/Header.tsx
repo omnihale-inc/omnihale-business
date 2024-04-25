@@ -6,7 +6,7 @@ import signoutIcon from "@/assets/icons/signout.png";
 const Header = () => {
   return (
     <header className="lg:flex mb-10 lg:justify-between">
-      <div className="lg:flex lg:items-center">
+      <div className="mb-6 lg:mb-0 flex items-center">
         <Image
           src="/logo.svg"
           alt="Omnihale Logo"
@@ -19,7 +19,7 @@ const Header = () => {
       </div>
       <div className="lg:flex">
         <button
-          className="lg:flex lg:items-center mr-6"
+          className="flex items-center mb-2 lg:mb-0 lg:mr-6"
           onClick={() => {
             location.href = "/profile";
           }}
@@ -34,7 +34,7 @@ const Header = () => {
           <span>profile</span>
         </button>
         <button
-          className="lg:flex lg:items-center"
+          className="flex items-center"
           onClick={() => {
             localStorage.removeItem("token");
             localStorage.removeItem("fields");
