@@ -13,20 +13,23 @@ const URL =
     ? "http://127.0.0.1:8000"
     : "https://api.omnihale.com";
 
+/**
+ * Represents the HomeContents component.
+ * @param {Object} onModal - The onModal function.
+ * @returns {JSX.Element} The rendered HomeContents component.
+ */
 const HomeContents = ({ onModal }: HomeContentsProps) => {
-  const [data, setData] = useState<{ appointments: object[] }>({
-    appointments: [],
-  });
+  const [data, setData] = useState<
+    { date: string; appointments: Array<object> }[]
+  >([]);
   const [loadingAppointment, setLoadingAppointment] = useState(true);
 
   useEffect(() => {
     socket.on("appointments", (data) => {
       const id = localStorage.getItem("user_id");
       if (id === data[1]) {
-        localStorage.setItem(
-          "appointments",
-          JSON.stringify({ appointments: data[0] })
-        );
+        console.log(data[0]);
+        localStorage.setItem("appointments", JSON.stringify(data[0]));
         const userAppointments = localStorage.getItem("appointments");
         if (userAppointments) setData(JSON.parse(userAppointments));
       }
@@ -34,34 +37,19 @@ const HomeContents = ({ onModal }: HomeContentsProps) => {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const options: RequestInit = {
-      // Set the headers
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    };
-    fetch(`${URL}/appointments`, options)
-      .then((data) => {
-        // Check if the token is valid
-        if (data.status === 422 || data.status === 401) {
-          localStorage.removeItem("token");
-          location.href = "/auth";
-        }
-        // Return the data
-        return data.json();
-      })
-      .then((data) => {
-        // For some weird reason data here gets sorted in ascending order
-        console.log(data);
-        if (typeof data === "object") {
-          setData({ appointments: data });
-          setLoadingAppointment(false);
-        }
-      });
+    fetchAppointmentsOnPageLoad(setData, setLoadingAppointment);
   }, []);
+
+  /**
+   * Handles the click event of the Add Appointment button.
+   * @param {boolean} value - The value to pass to the onModal function.
+   */
+  const handleAddAppointmentClick = (value: boolean) => {
+    onModal(value);
+    // Change the URL to "/add-appointment" without actually navigating to a different page
+    history.pushState({}, "", "/add-appointment");
+  };
+
   return (
     <>
       <section className=" lg:flex lg:justify-end">
@@ -70,12 +58,7 @@ const HomeContents = ({ onModal }: HomeContentsProps) => {
         </a>
         <Button
           backgroundColor="bg-green-700"
-          onClick={() => {
-            onModal(true);
-            // Change the URL to "/add-appointment" without actually
-            // navigating to a different page
-            history.pushState({}, "", "/add-appointment");
-          }}
+          onClick={() => handleAddAppointmentClick(true)}
         >
           Add Appointment
         </Button>
@@ -87,35 +70,22 @@ const HomeContents = ({ onModal }: HomeContentsProps) => {
         <ul className="text-xs lg:text-base">
           {
             // map through the appointments and display them
-            data.appointments.map((appointment, index) => {
-              console.log(appointment);
+            data.map((appointmentGroup, index) => {
+              console.log(appointmentGroup);
               return (
                 <li className="mb-2" key={index}>
-                  <ul className="flex border border-gray-400 w-fit rounded-lg shadow-md">
-                    {
-                      // map through the appointment and display the details
-                      Object.entries(appointment).map(
-                        // display the details in a list
-                        (appointmentItem, itemIndex) =>
-                          appointmentItem[0] !== "userId" && (
-                            <li
-                              className={`px-4 py-2 ${
-                                itemIndex !==
-                                Object.entries(appointment).length - 2
-                                  ? "border-r"
-                                  : ""
-                              } border-gray-400 flex flex-col justify-center w-44 md:w-fit`}
-                              key={itemIndex}
-                            >
-                              <h6 className="text-xs text-gray-500">
-                                {appointmentItem[0]}
-                              </h6>
-                              <p className="text-lg">{appointmentItem[1]}</p>
-                            </li>
-                          )
-                      )
-                    }
-                  </ul>
+                  <h5 className="mb-4 mt-8 text-sm lg:text-lg">
+                    {appointmentGroup.date}
+                  </h5>{" "}
+                  {/* Display the date */}
+                  {appointmentGroup.appointments.map(
+                    (appointment, appointmentIndex) => (
+                      <AppointmentItem
+                        appointmentIndex={appointmentIndex}
+                        appointment={appointment}
+                      />
+                    )
+                  )}
                 </li>
               );
             })
@@ -127,3 +97,76 @@ const HomeContents = ({ onModal }: HomeContentsProps) => {
 };
 
 export default HomeContents;
+
+function fetchAppointmentsOnPageLoad(
+  setData: React.Dispatch<
+    React.SetStateAction<{ date: string; appointments: Array<object> }[]>
+  >,
+  setLoadingAppointment: React.Dispatch<React.SetStateAction<boolean>>
+) {
+  const token = localStorage.getItem("token");
+  const options: RequestInit = {
+    // Set the headers
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  };
+  fetch(`${URL}/appointments`, options)
+    .then((data) => {
+      // Check if the token is valid
+      if (data.status === 422 || data.status === 401) {
+        localStorage.removeItem("token");
+        location.href = "/auth";
+      }
+      // Return the data
+      return data.json();
+    })
+    .then((data) => {
+      // For some weird reason data here gets sorted in ascending order
+      console.log(data);
+      if (typeof data === "object") {
+        console.log(data);
+        setData(data);
+        setLoadingAppointment(false);
+      }
+    });
+}
+
+function AppointmentItem({
+  appointment,
+  appointmentIndex,
+}: {
+  appointmentIndex: number;
+  appointment: object;
+}): React.JSX.Element {
+  return (
+    <ul
+      className="flex border border-gray-400 w-fit rounded-lg shadow-md mb-2"
+      key={appointmentIndex}
+    >
+      {
+        // map through the appointment and display the details
+        Object.entries(appointment).map(
+          // display the details in a list
+          (appointmentItem, itemIndex) =>
+            appointmentItem[0] !== "userId" &&
+            appointmentItem[0] !== "date" && (
+              <li
+                className={`px-4 py-2 ${
+                  itemIndex !== Object.entries(appointment).length - 3
+                    ? "border-r"
+                    : ""
+                } border-gray-400 flex flex-col justify-center w-44 md:w-fit`}
+                key={itemIndex}
+              >
+                <h6 className="text-xs text-gray-500">{appointmentItem[0]}</h6>
+                <p className="text-lg">{appointmentItem[1]}</p>
+              </li>
+            )
+        )
+      }
+    </ul>
+  );
+}

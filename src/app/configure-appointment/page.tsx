@@ -1,5 +1,6 @@
 "use client";
 
+// Import required modules and components
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -9,12 +10,18 @@ import addIcon from "@/assets/icons/add.png";
 import backIcon from "@/assets/icons/back.png";
 import withAuthenticated from "@/components/withAuthenticated";
 
+// Define the API URL based on the environment
 const URL =
   process.env.NODE_ENV === "development"
     ? "http://127.0.0.1:8000"
     : "https://api.omnihale.com";
 
+/**
+ * ConfigureAppointmentPage component
+ * Renders the configure appointment page
+ */
 function ConfigureAppointmentPage() {
+  // Define state variables
   const [fields, setFields] = useState<Array<string>>([]);
   const [inputField, setInputField] = useState<string>("");
   const [saveFields, setSaveFields] = useState(false);
@@ -22,6 +29,7 @@ function ConfigureAppointmentPage() {
   const [isTokenOk, setIsTokenOk] = useState(false);
   const [loadingFields, setLoadingFields] = useState(true);
 
+  // Check if the token is valid and set the state accordingly
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -59,8 +67,8 @@ function ConfigureAppointmentPage() {
     }
   }, [saveFields, fields]);
 
+  // Fetch the fields from the API and set the state
   useEffect(() => {
-    // Set the fields
     const token = localStorage.getItem("token");
     const options: RequestInit = {
       // Set the headers
@@ -87,10 +95,35 @@ function ConfigureAppointmentPage() {
       });
   }, []);
 
+  // Reusable component for displaying a field
+  const FieldItem = ({ field, index }: { field: string; index: number }) => (
+    <div
+      className="mb-2 flex justify-between list-none items-center"
+      key={index}
+    >
+      <div>
+        <p>{field}</p>
+      </div>
+      <button
+        className="flex items-center"
+        onClick={() => {
+          // Remove the field from the fields array
+          const newFields = fields.filter((_, i) => i !== index);
+          localStorage.setItem("fields", JSON.stringify(newFields));
+          setFields(newFields);
+        }}
+      >
+        <Image src={trashIcon} alt="remove icon" width={15} height={15} />
+        <span className="text-sm ml-1">Remove</span>
+      </button>
+    </div>
+  );
+
+  // Render the component
   return isTokenOk ? (
     <main className="lg:px-20 pt-10">
       <header className="flex items-center justify-between">
-        {/* go back home */}
+        {/* Go back home */}
         <a href="/">
           <Image
             src={backIcon}
@@ -104,46 +137,19 @@ function ConfigureAppointmentPage() {
       </header>
       <section className="w-2/5 bg-slate-50 mx-auto mt-14 p-10 box-border border border-gray-400 rounded-md">
         {isSaved && (
-          <p className="text-xs text-green-600 my-2">Changes was successful</p>
+          <p className="text-xs text-green-600 my-2">Changes were successful</p>
         )}
         <h3 className="mb-1 font-semibold text-xl">Add appointment fields</h3>
         <p className="text-gray-600 text-xs mb-5">
-          Appointments fields are the fields you want to available when adding a
-          patient appointment to the appointments list
+          Appointments fields are the fields you want to be available when
+          adding a patient appointment to the appointments list
         </p>
         <div className="mb-10">
-          {loadingFields && <p className="text-sm my-2">loading fields ...</p>}
+          {loadingFields && <p className="text-sm my-2">Loading fields ...</p>}
           <h3 className="underline font-semibold">Fields</h3>
-          {
-            // display the fields array
-            fields.map((field, index) => (
-              <div
-                className="mb-2 flex justify-between list-none items-center"
-                key={index}
-              >
-                <div>
-                  <p>{field}</p>
-                </div>
-                <button
-                  className="flex items-center"
-                  onClick={() => {
-                    // remove the field from the fields array
-                    const newFields = fields.filter((_, i) => i !== index);
-                    localStorage.setItem("fields", JSON.stringify(newFields));
-                    setFields(newFields);
-                  }}
-                >
-                  <Image
-                    src={trashIcon}
-                    alt="remove icon"
-                    width={15}
-                    height={15}
-                  />
-                  <span className="text-sm ml-1">Remove</span>
-                </button>
-              </div>
-            ))
-          }
+          {fields.map((field, index) => (
+            <FieldItem field={field} index={index} key={index} />
+          ))}
         </div>
         <input
           className="text-xs py-2 px-4 w-full rounded-lg mb-2 border border-gray-400"
@@ -159,10 +165,10 @@ function ConfigureAppointmentPage() {
           <button
             className="mr-2 border rounded-2xl border-black px-4 py-1 text-sm flex items-center"
             onClick={() => {
-              // add the input field to the fields array
+              // Add the input field to the fields array
               if (inputField !== "")
                 setFields([...fields, inputField.trim().toLowerCase()]);
-              // clear the input field
+              // Clear the input field
               setInputField("");
             }}
           >
@@ -180,7 +186,7 @@ function ConfigureAppointmentPage() {
           </button>
         </div>
       </section>
-      {/*logo and app name*/}
+      {/* Logo and app name */}
       <div className="flex justify-center items-center mt-10 mb-6">
         <Image
           src="/logo.svg"

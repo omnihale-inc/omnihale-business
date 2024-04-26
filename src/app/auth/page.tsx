@@ -15,6 +15,7 @@ const URL =
     : "https://api.omnihale.com";
 
 export default function AuthPage() {
+  // State for sign up form fields
   const [signUp, setSignUp] = useState<SignUpCredentials>({
     name: "",
     address: "",
@@ -23,34 +24,39 @@ export default function AuthPage() {
     password: "",
     confirmPassword: "",
   });
+
+  // State for login form fields
   const [login, setLogin] = useState<LoginCredentials>({
     email: "",
     password: "",
   });
-  // Renders Login component when the user visit's the page
+
+  // State for rendering sign up or login component
   const [isUserSignUp, setIsUserSignUp] = useState(true);
   const [isUserLogin, setIsUserLogin] = useState(true);
 
-  // Login error response
+  // State for login error response
   const [loginErrorResponse, setLoginErrorResponse] = useState<string | null>(
     null
   );
 
-  // Sign up  form errors
+  // State for sign up form errors
   const [errors, setErrors] = useState({
     invalidEmail: false,
     passwordNotSame: false,
     invalidPassword: false,
     empty: false,
   });
-  // Sign up error response
+
+  // State for sign up error response
   const [signUpErrorResponse, setSignUpErrorResponse] = useState<string | null>(
     null
   );
-  // Disables the sign up button
+
+  // State for disabling the sign up button
   const [disableButton, setDisabledButton] = useState(false);
 
-  // Disables the sign up button
+  // State for disabling the login button
   const [disableLoginButton, setDisabledLoginButton] = useState(false);
 
   // Checks if the user is logged in
@@ -63,16 +69,16 @@ export default function AuthPage() {
     }
   }, []);
 
+  // Handles sign up form field changes
   const onChangeHandlerSignUp: ChangeEventHandler<
     HTMLInputElement | HTMLSelectElement
   > = (e) => {
-    // Adds appointment input fields to addAppointment state
     const name = e.target.name;
     const value = e.target.value;
     setSignUp((state) => ({ ...state, [name]: value }));
   };
 
-  // Sign up props
+  // Sign up component props
   const signUpProps = {
     fields: signUp,
     onUserSignUp: setIsUserSignUp,
@@ -85,7 +91,7 @@ export default function AuthPage() {
     setErrorResponse: setSignUpErrorResponse,
   };
 
-  // Login props
+  // Login component props
   const loginProps = {
     fields: login,
     onUserSignUp: setIsUserSignUp,
@@ -97,56 +103,52 @@ export default function AuthPage() {
     setIsUserLogin,
   };
 
-  // Redirects the user to the dashboard if the user is logged in
+  // Renders sign up or login component based on user selection
   if (!isUserLogin) {
-    // Checks if the user is not signed up
     if (!isUserSignUp) {
       // Renders the sign up form
       return (
         <SignUp {...signUpProps}>
           {Object.entries(signUp).map((value, index) => {
-            // Gets the placeholder and field type
             const { fieldType, placeholder } = getPlaceHolderandFieldType(
               value[0]
             );
             return (
               <React.Fragment key={index}>
-                {
+                {value[0] === "state" ? (
                   // Renders a select field for the state
-                  value[0] === "state" ? (
-                    <select
-                      className="mb-2 w-full text-xs px-4 py-2 border rounded-md text-gray-400"
-                      name="state"
-                      onChange={onChangeHandlerSignUp}
-                      defaultValue="state"
-                    >
-                      <option value="state" disabled hidden>
-                        state
-                      </option>
-                      <option value="Abuja">Abuja</option>
-                      <option value="Kaduna">Kaduna</option>
-                    </select>
-                  ) : (
-                    // Renders the input fields
-                    <>
-                      <AuthInput
-                        key={index}
-                        type={fieldType}
-                        onChange={(e) => {
-                          onChangeHandlerSignUp(e);
-                          setSignUpErrorResponse(null);
-                        }}
-                        placeholder={placeholder}
-                        value={value[0]}
-                      />
-                      {value[0] === "password" && (
-                        <p className="text-xs mb-4">
-                          8 or more character password
-                        </p>
-                      )}
-                    </>
-                  )
-                }
+                  <select
+                    className="mb-2 w-full text-xs px-4 py-2 border rounded-md text-gray-400"
+                    name="state"
+                    onChange={onChangeHandlerSignUp}
+                    defaultValue="state"
+                  >
+                    <option value="state" disabled hidden>
+                      state
+                    </option>
+                    <option value="Abuja">Abuja</option>
+                    <option value="Kaduna">Kaduna</option>
+                  </select>
+                ) : (
+                  // Renders the input fields
+                  <>
+                    <AuthInput
+                      key={index}
+                      type={fieldType}
+                      onChange={(e) => {
+                        onChangeHandlerSignUp(e);
+                        setSignUpErrorResponse(null);
+                      }}
+                      placeholder={placeholder}
+                      value={value[0]}
+                    />
+                    {value[0] === "password" && (
+                      <p className="text-xs mb-4">
+                        8 or more character password
+                      </p>
+                    )}
+                  </>
+                )}
               </React.Fragment>
             );
           })}
@@ -166,7 +168,6 @@ export default function AuthPage() {
                 type={fieldType}
                 placeholder={placeholder}
                 onChange={(e) => {
-                  // Adds appointment input fields to addAppointment state
                   const name = e.target.name;
                   const value = e.target.value;
                   setLogin((state) => ({ ...state, [name]: value }));
@@ -191,24 +192,13 @@ export default function AuthPage() {
 // Gets the placeholder and field type
 const getPlaceHolderandFieldType = (value: string) => {
   console.log(value);
-  const placeholder =
-    // Checks if the value is password or confirm password
-    value === "confirmPassword"
-      ? // Sets the placeholder to confirm password
-        "confirm password"
-      : // Sets the placeholder to the value
-        value;
+  const placeholder = value === "confirmPassword" ? "confirm password" : value;
   const fieldType =
-    // Checks if the value is password or confirm password
     value === "password" || value === "confirmPassword"
-      ? // Sets the field type to password
-        "password"
-      : // Sets the field type to email
-      value === "email"
-      ? // Sets the field type to email
-        "email"
-      : // Sets the field type to text
-        "text";
+      ? "password"
+      : value === "email"
+      ? "email"
+      : "text";
   return { placeholder, fieldType };
 };
 
@@ -219,24 +209,18 @@ const loginHandler = (
   setErrorResponse: (value: string | null) => void,
   setDisbaledLoginButton: (value: boolean) => void
 ) => {
-  // Sends a post request to the server
   fetch(`${URL}/login`, {
     headers: {
       "Content-Type": "application/json",
     },
-    // Sends the login credentials to the server
     body: JSON.stringify({ login: loginCredentials }),
     method: "POST",
   })
     .then((data) => {
-      // Checks if the status is 200
       if (data.status === 200) {
-        // Sets the user login to true
         location.href = "/";
       }
-      // Checks if the status is 401
       if (data.status === 401) {
-        // Sets the error response
         setErrorResponse("Invalid credentials");
         setDisbaledLoginButton(false);
       } else {
@@ -247,7 +231,6 @@ const loginHandler = (
       return data.json();
     })
     .then((data) => {
-      // Sets the token in the local storage
       if (!data.message) {
         localStorage.setItem("token", data.access_token);
         localStorage.setItem("user_id", data.user);
@@ -265,22 +248,18 @@ const signUpHandler = (
   setErrorResponse: (value: string | null) => void,
   setDisableButton: (value: boolean | { (value: boolean): boolean }) => void
 ) => {
-  // Sends a post request to the server
   fetch(`${URL}/signup`, {
     headers: {
       "Content-Type": "application/json",
     },
-    // Sends the sign up credentials to the server
     body: JSON.stringify({ signUp: signUpCredentials }),
     method: "POST",
   })
     .then((data) => {
-      // Checks if the status is 200
       if (data.status === 200) {
         setUserSignUp(true);
       }
       if (data.status === 409) {
-        // Sets the error response
         setErrorResponse("information already exists");
         setDisableButton(false);
       }

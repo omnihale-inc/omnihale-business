@@ -1,4 +1,4 @@
-"use client";
+`use client`;
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
@@ -14,6 +14,10 @@ const URL =
     ? "http://127.0.0.1:8000"
     : "https://api.omnihale.com";
 
+/**
+ * Represents the component for adding appointments in a modal.
+ * @param onModal - A function that handles the modal state.
+ */
 const AddAppointmentModalChildren = React.memo(
   function AddAppointmentModalChildren({
     onModal,
@@ -25,6 +29,10 @@ const AddAppointmentModalChildren = React.memo(
     const [loadingFields, setLoadingFields] = useState(true);
     const [success, setSuccess] = useState(false);
 
+    /**
+     * Handles sending the appointment data to the server.
+     * @param addAppointment - The appointment object to be sent.
+     */
     const sendAppointmentHandler = (addAppointment: object) => {
       const user = localStorage.getItem("user_id");
       socket.emit("appointments", [addAppointment, user]);
@@ -34,6 +42,7 @@ const AddAppointmentModalChildren = React.memo(
     useEffect(() => {
       fieldsHandler(setFields, setLoadingFields);
     }, []);
+
     return (
       <div className="fixed w-screen h-screen backdrop-blur-sm grid place-items-center">
         <div className="w-5/12 border border-gray-200 rounded-md bg-gray-50">
