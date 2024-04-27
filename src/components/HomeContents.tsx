@@ -81,6 +81,7 @@ const HomeContents = ({ onModal }: HomeContentsProps) => {
                   {appointmentGroup.appointments.map(
                     (appointment, appointmentIndex) => (
                       <AppointmentItem
+                        key={appointmentIndex}
                         appointmentIndex={appointmentIndex}
                         appointment={appointment}
                       />
@@ -113,25 +114,34 @@ function fetchAppointmentsOnPageLoad(
       "Content-Type": "application/json",
     },
   };
-  fetch(`${URL}/appointments`, options)
-    .then((data) => {
-      // Check if the token is valid
-      if (data.status === 422 || data.status === 401) {
-        localStorage.removeItem("token");
-        location.href = "/auth";
-      }
-      // Return the data
-      return data.json();
-    })
-    .then((data) => {
-      // For some weird reason data here gets sorted in ascending order
-      console.log(data);
-      if (typeof data === "object") {
-        console.log(data);
-        setData(data);
-        setLoadingAppointment(false);
-      }
-    });
+
+  const userAppointments = localStorage.getItem("appointments");
+  // The renders the appointments in localstorage seeing as that, has its
+  // arrangement in the order of the appointment fields
+  if (userAppointments) {
+    setData(JSON.parse(userAppointments));
+    setLoadingAppointment(false);
+  } else {
+    fetch(`${URL}/appointments`, options)
+      .then((data) => {
+        // Check if the token is valid
+        if (data.status === 422 || data.status === 401) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("appointments");
+          location.href = "/auth";
+        }
+        // Return the data
+        return data.json();
+      })
+      .then((data) => {
+        // For some weird reason data here gets sorted in ascending order
+        if (typeof data === "object") {
+          console.log(data);
+          setData(data || []);
+          setLoadingAppointment(false);
+        }
+      });
+  }
 }
 
 function AppointmentItem({
