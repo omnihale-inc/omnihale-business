@@ -165,7 +165,7 @@ function AppointmentItem({
             appointmentItem[0] !== "date" && (
               <li
                 className={`px-4 py-2 ${
-                  itemIndex !== Object.entries(appointment).length - 3
+                  itemIndex !== Object.entries(appointment).length - 2
                     ? "border-r"
                     : ""
                 } border-gray-400 flex flex-col justify-center w-44 md:w-fit`}
