@@ -37,7 +37,9 @@ const HomeContents = ({ onModal }: HomeContentsProps) => {
   });
 
   useEffect(() => {
-    fetchAppointmentsOnPageLoad(setData, setLoadingAppointment);
+    const id = localStorage.getItem("user_id");
+    socket.emit("initial-appointments", id);
+    setLoadingAppointment(false);
   }, []);
 
   /**
@@ -98,51 +100,6 @@ const HomeContents = ({ onModal }: HomeContentsProps) => {
 };
 
 export default HomeContents;
-
-function fetchAppointmentsOnPageLoad(
-  setData: React.Dispatch<
-    React.SetStateAction<{ date: string; appointments: Array<object> }[]>
-  >,
-  setLoadingAppointment: React.Dispatch<React.SetStateAction<boolean>>
-) {
-  const token = localStorage.getItem("token");
-  const options: RequestInit = {
-    // Set the headers
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-  };
-
-  const userAppointments = localStorage.getItem("appointments");
-  // The renders the appointments in localstorage seeing as that, has its
-  // arrangement in the order of the appointment fields
-  if (userAppointments) {
-    setData(JSON.parse(userAppointments));
-    setLoadingAppointment(false);
-  } else {
-    fetch(`${URL}/appointments`, options)
-      .then((data) => {
-        // Check if the token is valid
-        if (data.status === 422 || data.status === 401) {
-          localStorage.removeItem("token");
-          localStorage.removeItem("appointments");
-          location.href = "/auth";
-        }
-        // Return the data
-        return data.json();
-      })
-      .then((data) => {
-        // For some weird reason data here gets sorted in ascending order
-        if (typeof data === "object") {
-          console.log(data);
-          setData(data || []);
-          setLoadingAppointment(false);
-        }
-      });
-  }
-}
 
 function AppointmentItem({
   appointment,
