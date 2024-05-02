@@ -45,7 +45,7 @@ const AddAppointmentModalChildren = React.memo(
 
     return (
       <div className="fixed w-screen h-screen backdrop-blur-sm grid place-items-center">
-        <div className="w-5/12 border border-gray-200 rounded-md bg-gray-50">
+        <div className="w-10/12 max-w-lg border border-gray-200 rounded-md bg-gray-50">
           <div className="flex items-center justify-between border-b border-gray-100 p-4 mb-2">
             <h3 className="font-semibold">Add Appointment</h3>
             <button
