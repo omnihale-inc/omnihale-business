@@ -8,4 +8,8 @@ const URL =
 
 export const socket = io(URL, {
   autoConnect: true,
+  reconnection: true,
+  reconnectionAttempts: 3,
+  reconnectionDelay: 1000,
+  reconnectionDelayMax: 5000,
 });
