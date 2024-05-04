@@ -122,7 +122,7 @@ function ConfigureAppointmentPage() {
   // Render the component
   return isTokenOk ? (
     <main className="lg:px-20 pt-10">
-      <header className="flex items-center justify-between">
+      <header className="flex items-center justify-between mx-2 lg:mx-0">
         {/* Go back home */}
         <a href="/">
           <Image
@@ -133,9 +133,11 @@ function ConfigureAppointmentPage() {
             className="mr-2"
           />
         </a>
-        <h1 className="text-2xl font-semibold">Configure Appointment</h1>
+        <h1 className="text-md lg:text-2xl font-semibold">
+          Configure Appointment
+        </h1>
       </header>
-      <section className="w-2/5 bg-slate-50 mx-auto mt-14 p-10 box-border border border-gray-400 rounded-md">
+      <section className="w-10/12 max-w-lg bg-slate-50 mx-auto mt-14 p-10 box-border border border-gray-400 rounded-md">
         {isSaved && (
           <p className="text-xs text-green-600 my-2">Changes were successful</p>
         )}
