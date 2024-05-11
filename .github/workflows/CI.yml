@@ -1,11 +1,11 @@
-name: Build
+name: CI
 
 on:
   push:
     branches: [main]
 
 jobs:
-  build:
+  CI:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     #
@@ -16,7 +16,7 @@ jobs:
     name: Node ${{ matrix.node }} build
     steps:
       - uses: actions/checkout@v3
-      - name: Run linting rules and build
+      - name: Run CI
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
