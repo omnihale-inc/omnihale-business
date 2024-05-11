@@ -20,6 +20,18 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run build
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run lint
+
+      - name: Run tests and generate coverage
+        run: |
+          npm run test &&
+          npm i coverage-badges-cli -g &&
+          coverage-badges --output coverage/badges.svg
+
+      - name: Run build
+        run: npm run build

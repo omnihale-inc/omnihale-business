@@ -5,7 +5,7 @@ import Image from "next/image";
 
 import addIcon from "@/assets/icons/add.png";
 import closeIcon from "@/assets/icons/close.png";
-import { socket } from "@/socket";
+import { socket } from "@/utils/socket";
 
 type stringObject = { [index: string]: string };
 

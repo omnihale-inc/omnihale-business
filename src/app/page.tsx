@@ -7,26 +7,24 @@ import Header from "@/components/Header";
 import AddAppointmentModal from "@/components/AddAppointmentModal";
 import AddAppointmentModalChildren from "@/components/AddAppointmentModalChildren";
 import withAuthenticated from "@/components/withAuthenticated";
+import { checkToken } from "@/utils/checkToken";
+import { isUserComingFromAddAppointmentPage } from "@/utils/isUserComingFromAddAppointmentPage";
 
 function HomePage() {
   const [modal, setModal] = useState(false);
   const [isTokenOk, setIsTokenOk] = useState(false);
 
   useEffect(() => {
-    // Check if the user is coming from the add-appointment page
-    if (localStorage.getItem("add-appointment") === "true") {
-      // Open the modal if the user is coming from the add-appointment page
-      setModal(true);
-      history.pushState({}, "", "/add-appointment");
-      localStorage.setItem("add-appointment", "false");
-    }
+    isUserComingFromAddAppointmentPage(
+      setModal,
+      history,
+      localStorage,
+      "add-appointment"
+    );
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      setIsTokenOk(true);
-    }
+    checkToken(setIsTokenOk, localStorage);
   }, []);
 
   return isTokenOk ? (

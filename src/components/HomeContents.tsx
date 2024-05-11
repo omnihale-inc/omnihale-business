@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Button from "@/components/Button";
-import { socket } from "@/socket";
+import { socket } from "@/utils/socket";
 
 type HomeContentsProps = {
   onModal: (value: boolean) => void;
