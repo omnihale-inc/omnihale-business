@@ -1,7 +1,7 @@
 "use client";
 
 // Import required modules and components
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import { useEffect, useState } from "react";
 
 import trashIcon from "@/assets/icons/trash.png";
@@ -9,12 +9,8 @@ import saveIcon from "@/assets/icons/save.png";
 import addIcon from "@/assets/icons/add.png";
 import backIcon from "@/assets/icons/back.png";
 import withAuthenticated from "@/components/withAuthenticated";
-
-// Define the API URL based on the environment
-const URL =
-  process.env.NODE_ENV === "development"
-    ? "http://127.0.0.1:8000"
-    : "https://api.omnihale.com";
+import URL from "@/app/constants/URL";
+import customRequestInit from "@/utils/customRequestInit";
 
 /**
  * ConfigureAppointmentPage component
@@ -29,7 +25,6 @@ function ConfigureAppointmentPage() {
   const [isTokenOk, setIsTokenOk] = useState(false);
   const [loadingFields, setLoadingFields] = useState(true);
 
-  // Check if the token is valid and set the state accordingly
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -37,15 +32,7 @@ function ConfigureAppointmentPage() {
     } else {
       location.href = "/auth";
     }
-    const options: RequestInit = {
-      // Set the headers
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(fields),
-    };
+    const options: RequestInit = customRequestInit(token, fields, "PUT");
     if (saveFields) {
       // Save the fields
       fetch(`${URL}/appointment-fields`, options)
@@ -122,21 +109,7 @@ function ConfigureAppointmentPage() {
   // Render the component
   return isTokenOk ? (
     <main className="lg:px-20 pt-10">
-      <header className="flex items-center justify-between mx-2 lg:mx-0">
-        {/* Go back home */}
-        <a href="/">
-          <Image
-            src={backIcon}
-            alt="back home"
-            width={25}
-            height={25}
-            className="mr-2"
-          />
-        </a>
-        <h1 className="text-md lg:text-2xl font-semibold">
-          Configure Appointment
-        </h1>
-      </header>
+      <ConfigureAppointmentHeader backIcon={backIcon} />
       <section className="w-10/12 max-w-lg bg-slate-50 mx-auto mt-14 p-10 box-border border border-gray-400 rounded-md">
         {isSaved && (
           <p className="text-xs text-green-600 my-2">Changes were successful</p>
@@ -207,3 +180,27 @@ function ConfigureAppointmentPage() {
 }
 
 export default withAuthenticated(ConfigureAppointmentPage);
+
+function ConfigureAppointmentHeader({
+  backIcon,
+}: {
+  backIcon: StaticImageData;
+}) {
+  return (
+    <header className="flex items-center justify-between mx-2 lg:mx-0">
+      {/* Go back home */}
+      <a href="/">
+        <Image
+          src={backIcon}
+          alt="back home"
+          width={25}
+          height={25}
+          className="mr-2"
+        />
+      </a>
+      <h1 className="text-md lg:text-2xl font-semibold">
+        Configure Appointment
+      </h1>
+    </header>
+  );
+}

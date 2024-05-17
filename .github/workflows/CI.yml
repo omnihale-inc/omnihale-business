@@ -35,3 +35,9 @@ jobs:
 
       - name: Run build
         run: npm run build
+
+      # - name: Deploy to Netlify
+      #   env:
+      # NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      #     NETLIFY_SITE_ID: your-netlify-site-id  # Replace with your Netlify site ID
+      #   run: npx netlify deploy --prod --dir=build  # Adjust the build directory if needed
