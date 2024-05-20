@@ -1,7 +1,7 @@
 function customRequestInit(
   token: string | null,
-  fields: string[] | object,
-  requestMethod: string
+  requestMethod: string,
+  fields?: string[] | object
 ): RequestInit {
   return {
     method: requestMethod,
