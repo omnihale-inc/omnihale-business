@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, FormEventHandler } from "react";
+import DOMpurify from "dompurify";
+
 import Image, { StaticImageData } from "next/image";
 
 import backIcon from "@/assets/icons/back.png";
@@ -10,37 +12,27 @@ import URL from "@/app/constants/URL";
 import customRequestInit from "@/utils/customRequestInit";
 
 type ProfileDetails = {
-  profileImg: string | StaticImageData;
   name: string;
   address: string;
-  onlineAppointmentThreshold: string;
-  dailyAppointmentThreshold: string;
+  remoteAppointmentsThreshold: number;
+  dailyAppointmentsThreshold: number;
 };
 
 function ProfilePage() {
   const [profileDetails, setProfileDetails] = useState<ProfileDetails>({
-    profileImg: "",
     address: "",
     name: "",
-    dailyAppointmentThreshold: "",
-    onlineAppointmentThreshold: "",
+    remoteAppointmentsThreshold: 0,
+    dailyAppointmentsThreshold: 0,
   });
-  const [isTOkenOk, setIsTokenOk] = useState(false);
-
-  const imageFileRef = useRef<HTMLInputElement>(null);
+  const [updated, setUpdated] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      setIsTokenOk(true);
-    } else {
+    if (!token) {
       location.href = "/auth";
     }
-    const options: RequestInit = customRequestInit(
-      token,
-      ProfileDetails,
-      "GET"
-    );
+    const options: RequestInit = customRequestInit(token, "GET");
     // Get user profile details
     fetch(`${URL}/profile`, options)
       .then((res) => res.json())
@@ -49,61 +41,44 @@ function ProfilePage() {
       });
   }, []);
 
+  const saveProfile = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      location.href = "/auth";
+    }
+    const options: RequestInit = customRequestInit(
+      token,
+      "PUT",
+      profileDetails
+    );
+
+    // update user profile details
+    fetch(`${URL}/profile`, options)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.message == "profile updated") {
+          setUpdated(true);
+          setTimeout(() => {
+            location.reload();
+          }, 1500);
+        }
+      });
+  };
   return (
     <main>
       <ProfileHeader backIcon={backIcon} />
       <section className="grid place-items-center">
-        <div className="w-96">
-          <div className="flex justify-between mb-6">
-            <div className="flex flex-col items-center">
-              <div className="relative h-20 w-20 mb-2">
-                <Image
-                  src={profileDetails.profileImg}
-                  alt="healthcare logo"
-                  fill
-                  className="rounded-full border border-gray-400 object-cover"
-                />
-              </div>
-              <input
-                type="file"
-                name="imageFile"
-                id="imageUpload"
-                accept="image/*"
-                className="hidden"
-                ref={imageFileRef}
-                onChange={(file) => {
-                  const reader = new FileReader();
-                  // handle file read
-                  reader.onload = (image) => {
-                    // handle image change
-                    setProfileDetails((state) => ({
-                      ...state,
-                      profileImg: image.target
-                        ?.result as unknown as StaticImageData,
-                    }));
-                  };
-                  // read the fil>
-                  reader.readAsDataURL(
-                    file.target.files ? file.target.files[0] : new Blob()
-                  );
-                }}
-              />
-              <button
-                className="px-4 py-1 rounded-full border text-xs border-gray-400"
-                onClick={
-                  // open file dialog
-                  () => imageFileRef?.current?.click()
-                }
-              >
-                Upload Image
-              </button>
-            </div>
+        <div className="w-8/12">
+          {updated && (
+            <p className="mb-3 text-green-700 text-center">Profile Updated</p>
+          )}
+          <div className="flex justify-center mb-6">
             <ProfileDetails
               setProfileDetails={setProfileDetails}
               profileDetails={profileDetails}
+              saveProfile={saveProfile}
             />
           </div>
-          <SaveProfileDetails saveIcon={saveIcon} />
         </div>
       </section>
     </main>
@@ -114,7 +89,7 @@ export default withAuthenticated(ProfilePage);
 
 function ProfileHeader({ backIcon }: { backIcon: string | StaticImageData }) {
   return (
-    <header className="flex items-center justify-between w-3/6 mb-40 mt-12 m-auto">
+    <header className="flex items-center justify-between w-4/6 mb-40 mt-12 m-auto">
       {/* go back home */}
       <a href="/">
         <Image
@@ -133,100 +108,106 @@ function ProfileHeader({ backIcon }: { backIcon: string | StaticImageData }) {
 function ProfileDetails({
   profileDetails,
   setProfileDetails,
+  saveProfile,
 }: {
   profileDetails: ProfileDetails;
   setProfileDetails: React.Dispatch<React.SetStateAction<ProfileDetails>>;
+  saveProfile: () => void;
 }) {
   return (
-    <div className="ml-4 p-2 w-60">
-      <form onSubmit={(e) => e.preventDefault()}>
-        <ProfileInput
-          value={profileDetails.name}
-          placeholder="hospital name"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setProfileDetails((state) => ({ ...state, name: e.target.value }))
-          }
-          id="1"
-          inputLabel="Hospital name"
-        />
-        <ProfileInput
-          value={profileDetails.address}
-          placeholder="hospital address"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setProfileDetails((state) => ({
-              ...state,
-              address: e.target.value,
-            }))
-          }
-          id="2"
-          inputLabel="Hospital address"
-        />
-        <ProfileInput
-          value={profileDetails.onlineAppointmentThreshold}
-          placeholder="Online appointment threshold"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setProfileDetails((state) => ({
-              ...state,
-              onlineAppointmentThreshold: e.target.value,
-            }))
-          }
-          id="3"
-          inputLabel=" Online appointment threshold"
-        />
-        <ProfileInput
-          value={profileDetails.dailyAppointmentThreshold}
-          placeholder="Daily appointment threshold"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setProfileDetails((state) => ({
-              ...state,
-              dailyAppointmentThreshold: e.target.value,
-            }))
-          }
-          id="4"
-          inputLabel="Daily appointment threshold"
-        />
-      </form>
+    <div className="ml-4 p-2 w-96">
+      <p className="text-xs mb-3">
+        To edit kindly click on the individual details and after editing your
+        details ensure you click on save button to implement changes
+      </p>
+      <ProfileDetail
+        label="Name"
+        value={profileDetails.name}
+        onInput={(e: any) =>
+          setProfileDetails((state) => ({
+            ...state,
+            name: DOMpurify.sanitize(e.target.innerHTML),
+          }))
+        }
+      />
+      <ProfileDetail
+        label="Address"
+        value={profileDetails.address}
+        onInput={(e: any) =>
+          setProfileDetails((state) => ({
+            ...state,
+            address: DOMpurify.sanitize(e.target.innerHTML),
+          }))
+        }
+      />
+      <h3 className="font-black mt-3 mb-1">Appointments Threshold</h3>
+      <ProfileDetail
+        label="Remote"
+        value={profileDetails.remoteAppointmentsThreshold}
+        onInput={(e: any) =>
+          setProfileDetails((state) => ({
+            ...state,
+            remoteAppointmentsThreshold: parseInt(
+              DOMpurify.sanitize(e.target.innerHTML)
+            ),
+          }))
+        }
+      />
+      <ProfileDetail
+        label="Daily"
+        value={profileDetails.dailyAppointmentsThreshold}
+        onInput={(e: any) =>
+          setProfileDetails((state) => ({
+            ...state,
+            dailyAppointmentsThreshold: parseInt(
+              DOMpurify.sanitize(e.target.innerHTML)
+            ),
+          }))
+        }
+      />
+      <div className="mt-8"></div>
+      <SaveProfileDetails saveIcon={saveIcon} onSaveProfile={saveProfile} />
     </div>
   );
 }
 
-function ProfileInput({
+function ProfileDetail({
+  label,
   value,
-  placeholder,
-  onChange,
-  inputLabel,
-  id,
+  onInput,
 }: {
-  value: string;
-  placeholder: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  inputLabel: string;
-  id: string;
+  label: string;
+  value: string | number;
+  onInput?: FormEventHandler<HTMLSpanElement>;
 }) {
   return (
-    <>
-      <div className="inline-block mb-1">
-        <label htmlFor={id}>{inputLabel}</label>
-      </div>
-
-      <input
-        className="block border w-full border-gray-400 text-xs py-3 px-2 rounded-md mb-4"
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-      />
-    </>
+    <div>
+      <span className="font-semibold">{label}</span>:
+      <span
+        contentEditable
+        onBlur={onInput}
+        suppressContentEditableWarning={true}
+        className="px-2"
+      >
+        {value}
+      </span>
+    </div>
   );
 }
 
 function SaveProfileDetails({
   saveIcon,
+  onSaveProfile,
 }: {
   saveIcon: string | StaticImageData;
+  onSaveProfile: () => void;
 }) {
   return (
     <div className="flex justify-end">
-      <button className="border rounded-2xl border-black px-4 py-1 text-sm flex items-center">
+      <button
+        className="border rounded-2xl border-black px-4 py-1 text-sm flex items-center"
+        onClick={onSaveProfile}
+      >
         <Image src={saveIcon} alt="save fields" width={15} height={15} />
         <span className="text-sm ml-1">Save</span>
       </button>

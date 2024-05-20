@@ -38,6 +38,6 @@ jobs:
 
       # - name: Deploy to Netlify
       #   env:
-      # NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-      #     NETLIFY_SITE_ID: your-netlify-site-id  # Replace with your Netlify site ID
-      #   run: npx netlify deploy --prod --dir=build  # Adjust the build directory if needed
+      #     NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      #     NETLIFY_SITE_ID: 9ef4bac7-de72-4a62-93b9-49b7666b6d01 # Replace with your Netlify site ID
+      #   run: npx netlify deploy --prod --dir=build # Adjust the build directory if needed
