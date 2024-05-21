@@ -28,10 +28,11 @@ const HomeContents = ({ onModal }: HomeContentsProps) => {
     socket.on("appointments", (data) => {
       const id = localStorage.getItem("user_id");
       if (id === data[1]) {
-        console.log(data[0]);
         localStorage.setItem("appointments", JSON.stringify(data[0]));
         const userAppointments = localStorage.getItem("appointments");
-        if (userAppointments) setData(JSON.parse(userAppointments));
+        if (userAppointments) {
+          setData(parseUserAppointments(userAppointments));
+        }
       }
     });
   });
@@ -57,13 +58,29 @@ const HomeContents = ({ onModal }: HomeContentsProps) => {
       <AppointmentControls
         handleAddAppointmentClick={handleAddAppointmentClick}
       />
-      <nav></nav>
       <AppointmentsList loadingAppointment={loadingAppointment} data={data} />
     </>
   );
 };
 
 export default HomeContents;
+
+function parseUserAppointments(
+  userAppointments: string
+): React.SetStateAction<{ date: string; appointments: Array<object> }[]> {
+  return JSON.parse(userAppointments).map((data: any) => {
+    const appointments = removeDateAndRemoteField(data);
+    return { date: data.date, appointments };
+  });
+
+  function removeDateAndRemoteField(data: any) {
+    return data.appointments.map((appointment: any) => {
+      delete appointment.date;
+      delete appointment.remote;
+      return appointment;
+    });
+  }
+}
 
 function AppointmentControls({
   handleAddAppointmentClick,
@@ -105,7 +122,6 @@ function AppointmentsList({
         {
           // map through the appointments and display them
           data.map((appointmentGroup, index) => {
-            console.log(appointmentGroup);
             return (
               <li className="mb-2" key={index}>
                 <h5 className="mb-4 mt-8 text-sm lg:text-lg">
@@ -145,22 +161,19 @@ function AppointmentItem({
         // map through the appointment and display the details
         Object.entries(appointment).map(
           // display the details in a list
-          (appointmentItem, itemIndex) =>
-            appointmentItem[0] !== "user_id" &&
-            appointmentItem[0] !== "date" &&
-            appointmentItem[0] !== "remote" && (
-              <li
-                className={`px-4 py-2 ${
-                  itemIndex !== Object.entries(appointment).length - 3
-                    ? "border-r"
-                    : ""
-                } border-gray-400 flex flex-col justify-center w-44 md:w-fit`}
-                key={itemIndex}
-              >
-                <h6 className="text-xs text-gray-500">{appointmentItem[0]}</h6>
-                <p className="text-lg">{appointmentItem[1]}</p>
-              </li>
-            )
+          (appointmentItem, itemIndex) => (
+            <li
+              className={`px-4 py-2 ${
+                itemIndex !== Object.entries(appointment).length - 1
+                  ? "border-r"
+                  : ""
+              } border-gray-400 flex flex-col justify-center w-44 md:w-fit`}
+              key={itemIndex}
+            >
+              <h6 className="text-xs text-gray-500">{appointmentItem[0]}</h6>
+              <p className="text-lg">{appointmentItem[1]}</p>
+            </li>
+          )
         )
       }
     </ul>

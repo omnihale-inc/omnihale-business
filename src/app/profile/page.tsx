@@ -43,13 +43,6 @@ function ProfilePage() {
   }, []);
 
   const saveProfile = () => {
-    if (
-      profileDetails.remoteAppointmentsThreshold >
-      profileDetails.dailyAppointmentsThreshold
-    ) {
-      setInValidThreshold(true);
-      return;
-    }
     const token = localStorage.getItem("token");
     if (!token) {
       location.href = "/auth";
