@@ -26,6 +26,7 @@ function ProfilePage() {
     dailyAppointmentsThreshold: 0,
   });
   const [updated, setUpdated] = useState(false);
+  const [inValidThreshold, setInValidThreshold] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -42,6 +43,13 @@ function ProfilePage() {
   }, []);
 
   const saveProfile = () => {
+    if (
+      profileDetails.remoteAppointmentsThreshold >
+      profileDetails.dailyAppointmentsThreshold
+    ) {
+      setInValidThreshold(true);
+      return;
+    }
     const token = localStorage.getItem("token");
     if (!token) {
       location.href = "/auth";
@@ -71,6 +79,11 @@ function ProfilePage() {
         <div className="w-8/12">
           {updated && (
             <p className="mb-3 text-green-700 text-center">Profile Updated</p>
+          )}
+          {inValidThreshold && (
+            <p className="mb-3 text-red-700 text-center">
+              remote threshold should be smaller than daily threshold
+            </p>
           )}
           <div className="flex justify-center mb-6">
             <ProfileDetails

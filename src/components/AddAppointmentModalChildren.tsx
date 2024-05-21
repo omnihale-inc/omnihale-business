@@ -28,6 +28,9 @@ const AddAppointmentModalChildren = React.memo(
     const [fields, setFields] = useState([]);
     const [loadingFields, setLoadingFields] = useState(true);
     const [success, setSuccess] = useState(false);
+    const [threshold, setThreshold] = useState({
+      dailyAppointmentsThreshold: false,
+    });
 
     /**
      * Handles sending the appointment data to the server.
@@ -35,9 +38,17 @@ const AddAppointmentModalChildren = React.memo(
      */
     const sendAppointmentHandler = (addAppointment: object) => {
       const user = localStorage.getItem("user_id");
-      socket.emit("appointments", [addAppointment, user]);
-      setSuccess(true);
+      socket.emit("appointments", [addAppointment, user, "businessUser"]);
     };
+
+    useEffect(() => {
+      socket.on("threshold", (data) => {
+        setThreshold(data);
+      });
+      socket.on("schedule", () => {
+        setSuccess(true);
+      });
+    });
 
     useEffect(() => {
       fieldsHandler(setFields, setLoadingFields);
@@ -65,51 +76,64 @@ const AddAppointmentModalChildren = React.memo(
             </button>
           </div>
           {loadingFields && <p className="text-sm ml-4 my-2">Loading ...</p>}
-          {success && (
-            <p className="text-md ml-4 my-2 text-green-600">success</p>
-          )}
-          <form
-            className="p-4"
-            onSubmit={
-              // Prevents form from submitting
-              (e) => e.preventDefault()
-            }
-          >
-            {
-              // Maps through fields and creates input fields
-              fields.map((field, index) => (
-                <input
-                  type="text"
-                  className="mb-2 w-full text-xs px-4 py-2 border rounded-md"
-                  key={index}
-                  name={field}
-                  value={addAppointment[field] || ""}
-                  placeholder={field}
-                  onChange={(e) => {
-                    setSuccess(false);
-                    // Adds appointment input fields to addAppointment state
-                    const name = e.target.name;
-                    const value = e.target.value;
-                    setAddAppointment((state: stringObject) => ({
-                      ...state,
-                      [name]: value,
-                    }));
-                  }}
-                />
-              ))
-            }
-            <div className="flex justify-end mt-2">
-              <button
-                className="border rounded-2xl border-black px-4 py-1 text-sm flex items-center"
-                onClick={() => {
-                  sendAppointmentHandler(addAppointment);
-                }}
+          {!threshold.dailyAppointmentsThreshold ? (
+            <>
+              {success && (
+                <p className="text-md ml-4 my-2 text-green-600">success</p>
+              )}
+              <form
+                className="p-4"
+                onSubmit={
+                  // Prevents form from submitting
+                  (e) => e.preventDefault()
+                }
               >
-                <Image src={addIcon} alt="save fields" width={13} height={13} />
-                <span className="text-sm ml-1">Add</span>
-              </button>
-            </div>
-          </form>
+                {
+                  // Maps through fields and creates input fields
+                  fields.map((field, index) => (
+                    <input
+                      type="text"
+                      className="mb-2 w-full text-xs px-4 py-2 border rounded-md"
+                      key={index}
+                      name={field}
+                      value={addAppointment[field] || ""}
+                      placeholder={field}
+                      onChange={(e) => {
+                        setSuccess(false);
+                        // Adds appointment input fields to addAppointment state
+                        const name = e.target.name;
+                        const value = e.target.value;
+                        setAddAppointment((state: stringObject) => ({
+                          ...state,
+                          [name]: value,
+                        }));
+                      }}
+                    />
+                  ))
+                }
+                <div className="flex justify-end mt-2">
+                  <button
+                    className="border rounded-2xl border-black px-4 py-1 text-sm flex items-center"
+                    onClick={() => {
+                      sendAppointmentHandler(addAppointment);
+                    }}
+                  >
+                    <Image
+                      src={addIcon}
+                      alt="save fields"
+                      width={13}
+                      height={13}
+                    />
+                    <span className="text-sm ml-1">Add</span>
+                  </button>
+                </div>
+              </form>
+            </>
+          ) : (
+            <p className="text-sm text-red-600 p-4">
+              Maximum appointments for today has been reached
+            </p>
+          )}
         </div>
       </div>
     );

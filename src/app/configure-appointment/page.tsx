@@ -32,7 +32,7 @@ function ConfigureAppointmentPage() {
     } else {
       location.href = "/auth";
     }
-    const options: RequestInit = customRequestInit(token, fields, "PUT");
+    const options: RequestInit = customRequestInit(token, "PUT", fields);
     if (saveFields) {
       // Save the fields
       fetch(`${URL}/appointment-fields`, options)

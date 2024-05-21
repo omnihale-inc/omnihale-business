@@ -146,11 +146,12 @@ function AppointmentItem({
         Object.entries(appointment).map(
           // display the details in a list
           (appointmentItem, itemIndex) =>
-            appointmentItem[0] !== "userId" &&
-            appointmentItem[0] !== "date" && (
+            appointmentItem[0] !== "user_id" &&
+            appointmentItem[0] !== "date" &&
+            appointmentItem[0] !== "remote" && (
               <li
                 className={`px-4 py-2 ${
-                  itemIndex !== Object.entries(appointment).length - 2
+                  itemIndex !== Object.entries(appointment).length - 3
                     ? "border-r"
                     : ""
                 } border-gray-400 flex flex-col justify-center w-44 md:w-fit`}
