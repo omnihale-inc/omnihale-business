@@ -191,7 +191,6 @@ export default function AuthPage() {
 
 // Gets the placeholder and field type
 const getPlaceHolderandFieldType = (value: string) => {
-  console.log(value);
   const placeholder = value === "confirmPassword" ? "confirm password" : value;
   const fieldType =
     value === "password" || value === "confirmPassword"
